@@ -1,15 +1,15 @@
-export interface QBTokens {
-    access_token: string;
-    refresh_token: string;
-    realmId: string;
-    expires_at?: Date;
-}
-
 export interface QBConfig {
     clientId: string;
     clientSecret: string;
     environment: 'sandbox' | 'production';
     redirectUri: string;
+}
+
+export interface QBTokens {
+    access_token: string;
+    refresh_token: string;
+    realmId: string;
+    expires_at?: Date;
 }
 
 export interface QBTokenStorage {

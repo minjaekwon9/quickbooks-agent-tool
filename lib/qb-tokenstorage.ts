@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { QBTokens, QBTokenStorage } from './qb-types';
 
 export class CookieTokenStorage implements QBTokenStorage {
-    private readonly COOKIE_PREFIX = 'qb_';
+    private readonly COOKIE_PREFIX = 'qb_'; // Prefix for QuickBooks cookies
     private readonly COOKIE_OPTIONS = {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -18,7 +18,7 @@ export class CookieTokenStorage implements QBTokenStorage {
             realmId: tokens.realmId,
             expires_at: tokens.expires_at?.toISOString(),
         };
-
+        // Encode token object as base64 to store in cookie
         const encodedTokens = Buffer.from(JSON.stringify(tokenData)).toString('base64');
         cookieStore.set(`${this.COOKIE_PREFIX}${userId}`, encodedTokens, this.COOKIE_OPTIONS);
     }

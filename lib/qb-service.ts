@@ -73,7 +73,7 @@ export class QuickBooksService {
         };
     }
 
-    // Save tokens after OAuth
+    // Save tokens after OAuth flow
     async saveTokensFromOAuth(userId: string, tokens: QBTokens): Promise<void> {
         await this.tokenStorage.saveTokens(userId, tokens);
     }
@@ -88,6 +88,85 @@ export class QuickBooksService {
                     // Extract just the company name from the response
                     const companyName = companyInfo?.CompanyName;
                     resolve(companyName);
+                }
+            });
+        });
+    }
+
+    // Get a specific invoice by ID
+    async getInvoice(invoiceId: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.qbo.getInvoice(invoiceId, (err: any, invoice: any) => {
+                if (err) {
+                    reject(new Error(`Failed to get invoice: ${err.message || JSON.stringify(err)}`));
+                } else {
+                    resolve(invoice);
+                }
+            });
+        });
+    }
+
+    // List invoices with optional criteria
+    async findInvoices(criteria?: string): Promise<any[]> {
+        return new Promise((resolve, reject) => {
+            const query = criteria || "";
+            this.qbo.findInvoices(query, (err: any, invoices: any) => {
+                if (err) {
+                    reject(new Error(`Failed to find invoices: ${err.message || JSON.stringify(err)}`));
+                } else {
+                    resolve(invoices?.QueryResponse?.Invoice || []);
+                }
+            });
+        });
+    }
+
+    // Create a new invoice
+    async createInvoice(invoiceData: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.qbo.createInvoice(invoiceData, (err: any, invoice: any) => {
+                if (err) {
+                    reject(new Error(`Failed to create invoice: ${err.message || JSON.stringify(err)}`));
+                } else {
+                    resolve(invoice);
+                }
+            });
+        });
+    }
+
+    // Update an existing invoice
+    async updateInvoice(invoiceData: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.qbo.updateInvoice(invoiceData, (err: any, invoice: any) => {
+                if (err) {
+                    reject(new Error(`Failed to update invoice: ${err.message || JSON.stringify(err)}`));
+                } else {
+                    resolve(invoice);
+                }
+            });
+        });
+    }
+
+    // Delete an invoice
+    async deleteInvoice(invoiceIdOrEntity: any): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.qbo.deleteInvoice(invoiceIdOrEntity, (err: any, invoice: any) => {
+                if (err) {
+                    reject(new Error(`Failed to delete invoice: ${err.message || JSON.stringify(err)}`));
+                } else {
+                    resolve(invoice);
+                }
+            });
+        });
+    }
+
+    // Send invoice PDF via email
+    async sendInvoicePdf(invoiceId: string, emailAddress: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            this.qbo.sendInvoicePdf(invoiceId, emailAddress, (err: any, result: any) => {
+                if (err) {
+                    reject(new Error(`Failed to send invoice PDF: ${err.message || JSON.stringify(err)}`));
+                } else {
+                    resolve(result);
                 }
             });
         });

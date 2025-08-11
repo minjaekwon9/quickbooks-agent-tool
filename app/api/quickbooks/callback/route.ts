@@ -1,12 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
 const OAuthClient = require('intuit-oauth');
+import { NextRequest, NextResponse } from 'next/server';
 import { QuickBooksService } from '@/lib/qb-service';
-
-// Environment variables for QuickBooks OAuth
-const CLIENT_ID = process.env.QB_CLIENT_ID!;
-const CLIENT_SECRET = process.env.QB_CLIENT_SECRET!;
-const ENVIRONMENT = process.env.QB_ENVIRONMENT!;
-const REDIRECT_URI = process.env.QB_REDIRECT_URI!;
 
 export async function GET(req: NextRequest) {
   const url = new URL(req.url);
@@ -20,10 +14,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing code or realmId' }, { status: 400 });
 
   const oauthClient = new OAuthClient({
-    clientId: CLIENT_ID,
-    clientSecret: CLIENT_SECRET,
-    environment: ENVIRONMENT,
-    redirectUri: REDIRECT_URI,
+    // Environment variables for QuickBooks OAuth
+    clientId: process.env.QB_CLIENT_ID!,
+    clientSecret: process.env.QB_CLIENT_SECRET!,
+    environment: process.env.QB_ENVIRONMENT as 'sandbox' | 'production',
+    redirectUri: process.env.QB_REDIRECT_URI!,
   });
 
   try {
@@ -41,33 +36,12 @@ export async function GET(req: NextRequest) {
 
     // Save tokens using QuickBooksService
     const qbService = new QuickBooksService();
-    const userId = 'default_user'; // Replace with actual user ID from session/auth
+    const userId = 'default_user';  // TODO: Replace with a user ID from session or context
     await qbService.saveTokensFromOAuth(userId, tokenData);
-
-    // Log success (remove in production)
-    console.log('Token exchange successful:', {
-      access_token: tokens.access_token ? 'present' : 'missing',
-      refresh_token: tokens.refresh_token ? 'present' : 'missing',
-      realmId: realmId,
-      expires_in: tokens.expires_in
-    });
-
-    // Test the connection by getting company info
-    try {
-      await qbService.initialize(userId);
-      const companyName = await qbService.getCompanyName();
-      console.log('Company connected:', companyName);
-    } catch (testError) {
-      console.error('Failed to test connection:', testError);
-    }
 
     return NextResponse.redirect(new URL('/connect?success=true', req.url));
   } catch (err: any) {
-    console.error('Token exchange failed:', {
-      error: err.message,
-      fault: err.fault,
-      intuit_tid: err.intuit_tid
-    });
+    console.error('Token exchange failed:', err.message);
 
     return NextResponse.redirect(new URL('/connect?error=token_exchange_failed', req.url));
   }
